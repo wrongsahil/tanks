@@ -1,5 +1,6 @@
 import pygame
 import time
+import math
 
 pygame.init()
 
@@ -16,17 +17,30 @@ font_small = pygame.font.SysFont(None, 40)
 gameDisplay = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Tanks")
 
-def draw_tank(x, y):
+clock = pygame.time.Clock()
+
+def draw_tank(x, y, x_gun, y_gun):
 	pygame.draw.circle(gameDisplay, black, (x, y), 10)
 	pygame.draw.rect(gameDisplay, black, (x-20, y, 40, 20))
 
 	for wheel_x in range(x-15, x+16, 5):
 		pygame.draw.circle(gameDisplay, black, (wheel_x, y+22), 5)
 
+	#x_gun = x
+	#y_gun = y - int (math.sqrt(400-((x_gun-x)**2)))
+
+	pygame.draw.line(gameDisplay, black, (x, y), (x_gun, y_gun), 5)
+
 def gameloop():
 	gameExit = False
+	
 	x = 400
 	y = 553
+	x_gun = x-20
+	y_gun = y - int (math.sqrt(400-((x_gun-x)**2)))
+	change_x_gun = 0
+	change_x = 0
+
 	while not gameExit:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
@@ -34,11 +48,39 @@ def gameloop():
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_ESCAPE:
 					gameExit = True
+				elif event.key == pygame.K_d:
+					change_x_gun =1
+				elif event.key == pygame.K_a:
+					change_x_gun = -1
+				elif event.key == pygame.K_LEFT:
+					change_x = -1
+				elif event.key == pygame.K_RIGHT:
+					change_x = 1
+
+			elif event.type == pygame.KEYUP:
+				if event.key == pygame.K_a:
+					change_x_gun = 0
+				elif event.key == pygame.K_d:
+					change_x_gun = 0
+				elif event.key == pygame.K_RIGHT:
+					change_x = 0
+				elif event.key == pygame.K_LEFT:
+					change_x = 0
+
+		if (x_gun+change_x_gun) >= (x-20) and (x_gun + change_x_gun) <= (x+20):
+			x_gun += change_x_gun
+			y_gun = y - int (math.sqrt(400-((x_gun-x)**2)))
+
+		x += change_x
+		x_gun +=change_x
+
 
 		gameDisplay.fill(white)
 		pygame.draw.rect(gameDisplay, green, (0, 580, 800, 20))
-		draw_tank(x, y)
+		draw_tank(x, y, x_gun, y_gun)
 		pygame.display.update()
+
+		clock.tick(50)
 
 	pygame.quit()
 	quit()
